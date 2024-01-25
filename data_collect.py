@@ -3,16 +3,23 @@ import cv2
 import time
 import os
 
-model = YOLO('/home/lee/Documents/HyperSort/data_collect/best_weights/best_inference_yolov8x.pt')
-raw_dir = "/home/lee/Documents/HyperSort/data_collect/save_files/raw"
-pred_dir = "/home/lee/Documents/HyperSort/data_collect/save_files/pred"
-duration = 2
+# Setup
+model = YOLO('/home/lee/Documents/TemasekLab/Bottle-data-collect/best_weights/best_inference_yolov8x.pt')
+raw_dir = "/home/lee/Documents/TemasekLab/Bottle-data-collect/save_files/raw"
+pred_dir = "/home/lee/Documents/TemasekLab/Bottle-data-collect/save_files/pred"
+
+# Time between captured frames
+duration = 5
+
+# Camera index
+
+cam_index = 8
 
 font = cv2.FONT_HERSHEY_SIMPLEX  # Choose a font style for displaying text
 font_scale = 0.5  # Adjust font size
 font_color = (0, 0, 255)  # Blue text color
 
-cap = cv2.VideoCapture(4)
+cap = cv2.VideoCapture(cam_index)
 last_try_time = time.time()
 
 while True:
@@ -20,6 +27,7 @@ while True:
 
     if success:
         results = model(frame, show=True, conf=0.6, iou=0.5, verbose=False)
+        # results = model(frame, show=True, conf=0.6, iou=0.5, verbose=False, device='cpu')
         boxes = results[0].boxes.xyxy.tolist()
         confidences = results[0].boxes.conf.tolist()
 
@@ -46,12 +54,15 @@ while True:
                     text = f"{confidence:.2f}"  # Format confidence to two decimal places
                     cv2.putText(frame, text, (text_x, text_y), font, font_scale, font_color, 2)
                     
+                # Number of bottle counter
+                print(f"Number of bottle: {count}")
+                
                 # Save the final frame with all boxes drawn
-                print("Number of bottle: {count}")
                 cv2.imwrite(pred, frame)
 
                 # Create a single TXT file with all boxes' info
-                txt_pred = pred.replace(".jpg", ".txt")
+                txt_pred = os.path.join(raw_dir, f"pred_{time.strftime('%Y-%m-%d_%H-%M-%S')}.txt")
+                # txt_pred = pred.replace(".jpg", ".txt")
                 with open(txt_pred, "w") as f:
                     for box, conf in zip(boxes, confidences):
                         x1, y1, x2, y2 = box
