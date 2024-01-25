@@ -12,13 +12,14 @@ pred_dir = "/home/lee/Documents/TemasekLab/Bottle-data-collect/save_files/pred"
 duration = 5
 
 # Camera index
-
 cam_index = 8
 
+# Text setup
 font = cv2.FONT_HERSHEY_SIMPLEX  # Choose a font style for displaying text
 font_scale = 0.5  # Adjust font size
 font_color = (0, 0, 255)  # Red text color
 
+# initialize camera
 cap = cv2.VideoCapture(cam_index)
 last_try_time = time.time()
 
@@ -62,7 +63,6 @@ while True:
 
                 # Create a single TXT file with all boxes' info
                 txt_pred = os.path.join(raw_dir, f"pred_{time.strftime('%Y-%m-%d_%H-%M-%S')}.txt")
-                # txt_pred = pred.replace(".jpg", ".txt")
                 with open(txt_pred, "w") as f:
                     for box, conf in zip(boxes, confidences):
                         x1, y1, x2, y2 = box
