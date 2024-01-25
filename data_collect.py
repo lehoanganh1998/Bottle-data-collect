@@ -17,7 +17,7 @@ cam_index = 8
 
 font = cv2.FONT_HERSHEY_SIMPLEX  # Choose a font style for displaying text
 font_scale = 0.5  # Adjust font size
-font_color = (0, 0, 255)  # Blue text color
+font_color = (0, 0, 255)  # Red text color
 
 cap = cv2.VideoCapture(cam_index)
 last_try_time = time.time()
