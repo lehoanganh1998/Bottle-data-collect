@@ -4,12 +4,12 @@ import time
 import os
 
 # Setup
-model = YOLO('/home/lee/Documents/TemasekLab/Bottle-data-collect/best_weights/best_inference_yolov8x.pt')
-raw_dir = "/home/lee/Documents/TemasekLab/Bottle-data-collect/save_files/raw"
-pred_dir = "/home/lee/Documents/TemasekLab/Bottle-data-collect/save_files/pred"
+model = YOLO('./best_weights/best_inference_yolov8x.pt')
+raw_dir = "./save_files/raw"
+pred_dir = "./save_files/pred"
 
 # Time between captured frames
-duration = 5
+duration = 30
 
 # Camera index
 cam_index = 8
@@ -23,19 +23,22 @@ font_color = (0, 0, 255)  # Red text color
 cap = cv2.VideoCapture(cam_index)
 last_try_time = time.time()
 
+# Initialize model
+run_model = True
+
+
 while True:
     success, frame = cap.read()
 
     if success:
-        results = model(frame, show=True, conf=0.6, iou=0.5, verbose=False)
-        # results = model(frame, show=True, conf=0.6, iou=0.5, verbose=False, device='cpu')
-        boxes = results[0].boxes.xyxy.tolist()
-        confidences = results[0].boxes.conf.tolist()
+        if run_model:
+            # results = model(frame, show=True, conf=0.6, iou=0.5, verbose=False)
+            results = model(frame, show=False, conf=0.6, iou=0.5, verbose=False, device='cpu')
+            boxes = results[0].boxes.xyxy.tolist()
+            confidences = results[0].boxes.conf.tolist()
 
-        if time.time() - last_try_time >= duration:
-            if not boxes:
-                print("No bottle detected")
-            else:
+            # Save frame only when boxes are detected
+            if boxes:
                 count = 0
                 raw = os.path.join(raw_dir, f"raw_{time.strftime('%Y-%m-%d_%H-%M-%S')}.jpg")
                 cv2.imwrite(raw, frame)
@@ -68,10 +71,16 @@ while True:
                         x1, y1, x2, y2 = box
                         confidence = conf
                         f.write(f"{x1},{y1},{x2},{y2},{confidence}\n")
-
-
+            else:
+                print('No bottle detected')
+            # Turn off model to prevent overheat
+            run_model = False
+            
+        # Check if it's time to run the model again
+        if time.time() - last_try_time >= duration:
             last_try_time = time.time()
-
+            run_model = True  # Set the flag to True to enable model execution in the next loop
+            
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
     else:
