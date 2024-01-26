@@ -73,6 +73,7 @@ while True:
                         f.write(f"{x1},{y1},{x2},{y2},{confidence}\n")
             else:
                 print('No bottle detected')
+                
             # Turn off model to prevent overheat
             run_model = False
             
